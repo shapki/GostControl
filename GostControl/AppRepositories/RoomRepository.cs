@@ -1,229 +1,93 @@
 ﻿using GostControl.AppModels;
 using GostControl.AppServices;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Linq;
 
 namespace GostControl.AppRepositories
 {
     public class RoomRepository
     {
-        private readonly DatabaseHelper _dbHelper;
+        private readonly LocalDataService _dataService;
 
         public RoomRepository()
         {
-            _dbHelper = new DatabaseHelper();
+            _dataService = LocalDataService.Instance;
         }
 
         public List<Room> GetAllRooms()
         {
-            var rooms = new List<Room>();
-
-            using (var connection = _dbHelper.GetConnection())
-            {
-                connection.Open();
-                string query = @"
-                    SELECT r.RoomID, r.RoomNumber, r.CategoryID, r.Floor, 
-                           r.HasBalcony, r.IsAvailable,
-                           rc.CategoryName, rc.BasePrice, rc.MaxCapacity
-                    FROM Hotel.Rooms r
-                    INNER JOIN Hotel.RoomCategories rc ON r.CategoryID = rc.CategoryID
-                    ORDER BY r.Floor, r.RoomNumber";
-
-                using (var command = new SqlCommand(query, connection))
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        rooms.Add(new Room
-                        {
-                            RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                            RoomNumber = reader.GetString(reader.GetOrdinal("RoomNumber")),
-                            CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                            Floor = reader.GetInt32(reader.GetOrdinal("Floor")),
-                            HasBalcony = reader.GetBoolean(reader.GetOrdinal("HasBalcony")),
-                            IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable")),
-                            Category = new RoomCategory
-                            {
-                                CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                                CategoryName = reader.GetString(reader.GetOrdinal("CategoryName")),
-                                BasePrice = reader.GetDecimal(reader.GetOrdinal("BasePrice")),
-                                MaxCapacity = reader.GetInt32(reader.GetOrdinal("MaxCapacity"))
-                            }
-                        });
-                    }
-                }
-            }
-
-            return rooms;
+            return _dataService.Rooms.ToList();
         }
 
         public List<Room> GetAvailableRooms()
         {
-            var rooms = new List<Room>();
-
-            using (var connection = _dbHelper.GetConnection())
-            {
-                connection.Open();
-                string query = @"
-                    SELECT r.RoomID, r.RoomNumber, r.CategoryID, r.Floor, 
-                           r.HasBalcony, r.IsAvailable,
-                           rc.CategoryName, rc.BasePrice, rc.MaxCapacity
-                    FROM Hotel.Rooms r
-                    INNER JOIN Hotel.RoomCategories rc ON r.CategoryID = rc.CategoryID
-                    WHERE r.IsAvailable = 1
-                    ORDER BY r.Floor, r.RoomNumber";
-
-                using (var command = new SqlCommand(query, connection))
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        rooms.Add(new Room
-                        {
-                            RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                            RoomNumber = reader.GetString(reader.GetOrdinal("RoomNumber")),
-                            CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                            Floor = reader.GetInt32(reader.GetOrdinal("Floor")),
-                            HasBalcony = reader.GetBoolean(reader.GetOrdinal("HasBalcony")),
-                            IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable")),
-                            Category = new RoomCategory
-                            {
-                                CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                                CategoryName = reader.GetString(reader.GetOrdinal("CategoryName")),
-                                BasePrice = reader.GetDecimal(reader.GetOrdinal("BasePrice")),
-                                MaxCapacity = reader.GetInt32(reader.GetOrdinal("MaxCapacity"))
-                            }
-                        });
-                    }
-                }
-            }
-
-            return rooms;
+            return _dataService.GetAvailableRooms();
         }
 
         public Room GetRoomById(int roomId)
         {
-            using (var connection = _dbHelper.GetConnection())
-            {
-                connection.Open();
-                string query = @"
-                    SELECT r.*, rc.CategoryName, rc.BasePrice, rc.MaxCapacity
-                    FROM Hotel.Rooms r
-                    INNER JOIN Hotel.RoomCategories rc ON r.CategoryID = rc.CategoryID
-                    WHERE r.RoomID = @RoomID";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@RoomID", roomId);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new Room
-                            {
-                                RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                                RoomNumber = reader.GetString(reader.GetOrdinal("RoomNumber")),
-                                CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                                Floor = reader.GetInt32(reader.GetOrdinal("Floor")),
-                                HasBalcony = reader.GetBoolean(reader.GetOrdinal("HasBalcony")),
-                                IsAvailable = reader.GetBoolean(reader.GetOrdinal("IsAvailable")),
-                                Category = new RoomCategory
-                                {
-                                    CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                                    CategoryName = reader.GetString(reader.GetOrdinal("CategoryName")),
-                                    BasePrice = reader.GetDecimal(reader.GetOrdinal("BasePrice")),
-                                    MaxCapacity = reader.GetInt32(reader.GetOrdinal("MaxCapacity"))
-                                }
-                            };
-                        }
-                        return null;
-                    }
-                }
-            }
+            return _dataService.GetRoomById(roomId);
         }
 
         public int AddRoom(Room room)
         {
-            using (var connection = _dbHelper.GetConnection())
+            room.RoomID = _dataService.GetNextRoomId();
+
+            if (room.CategoryID > 0)
             {
-                connection.Open();
-                string query = @"
-                    INSERT INTO Hotel.Rooms 
-                    (RoomNumber, CategoryID, Floor, HasBalcony, IsAvailable)
-                    OUTPUT INSERTED.RoomID
-                    VALUES (@RoomNumber, @CategoryID, @Floor, @HasBalcony, @IsAvailable)";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@RoomNumber", room.RoomNumber);
-                    command.Parameters.AddWithValue("@CategoryID", room.CategoryID);
-                    command.Parameters.AddWithValue("@Floor", room.Floor);
-                    command.Parameters.AddWithValue("@HasBalcony", room.HasBalcony);
-                    command.Parameters.AddWithValue("@IsAvailable", room.IsAvailable);
-
-                    return (int)command.ExecuteScalar();
-                }
+                room.Category = _dataService.GetCategoryById(room.CategoryID);
             }
+
+            _dataService.Rooms.Add(room);
+            return room.RoomID;
         }
 
         public void UpdateRoom(Room room)
         {
-            using (var connection = _dbHelper.GetConnection())
+            var existingRoom = _dataService.GetRoomById(room.RoomID);
+            if (existingRoom != null)
             {
-                connection.Open();
-                string query = @"
-                    UPDATE Hotel.Rooms 
-                    SET RoomNumber = @RoomNumber,
-                        CategoryID = @CategoryID,
-                        Floor = @Floor,
-                        HasBalcony = @HasBalcony,
-                        IsAvailable = @IsAvailable
-                    WHERE RoomID = @RoomID";
-
-                using (var command = new SqlCommand(query, connection))
+                if (room.CategoryID > 0 && (room.Category == null || room.Category.CategoryID != room.CategoryID))
                 {
-                    command.Parameters.AddWithValue("@RoomID", room.RoomID);
-                    command.Parameters.AddWithValue("@RoomNumber", room.RoomNumber);
-                    command.Parameters.AddWithValue("@CategoryID", room.CategoryID);
-                    command.Parameters.AddWithValue("@Floor", room.Floor);
-                    command.Parameters.AddWithValue("@HasBalcony", room.HasBalcony);
-                    command.Parameters.AddWithValue("@IsAvailable", room.IsAvailable);
-
-                    command.ExecuteNonQuery();
+                    room.Category = _dataService.GetCategoryById(room.CategoryID);
                 }
+
+                int index = _dataService.Rooms.IndexOf(existingRoom);
+                _dataService.Rooms[index] = room;
             }
         }
 
         public void DeleteRoom(int roomId)
         {
-            using (var connection = _dbHelper.GetConnection())
+            var room = _dataService.GetRoomById(roomId);
+            if (room != null)
             {
-                connection.Open();
-                string query = "DELETE FROM Hotel.Rooms WHERE RoomID = @RoomID";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@RoomID", roomId);
-                    command.ExecuteNonQuery();
-                }
+                _dataService.Rooms.Remove(room);
             }
         }
 
         public void UpdateRoomAvailability(int roomId, bool isAvailable)
         {
-            using (var connection = _dbHelper.GetConnection())
+            var room = _dataService.GetRoomById(roomId);
+            if (room != null)
             {
-                connection.Open();
-                string query = "UPDATE Hotel.Rooms SET IsAvailable = @IsAvailable WHERE RoomID = @RoomID";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@RoomID", roomId);
-                    command.Parameters.AddWithValue("@IsAvailable", isAvailable);
-                    command.ExecuteNonQuery();
-                }
+                room.IsAvailable = isAvailable;
             }
+        }
+
+        public List<Room> GetRoomsByCategory(int categoryId)
+        {
+            return _dataService.Rooms.Where(r => r.CategoryID == categoryId).ToList();
+        }
+
+        public List<Room> SearchRooms(string roomNumber)
+        {
+            if (string.IsNullOrWhiteSpace(roomNumber))
+                return GetAllRooms();
+
+            return _dataService.Rooms
+                .Where(r => r.RoomNumber.ToLower().Contains(roomNumber.ToLower()))
+                .ToList();
         }
     }
 }

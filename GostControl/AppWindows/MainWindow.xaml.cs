@@ -1,7 +1,7 @@
 ﻿using GostControl.AppViewModels;
 using System.Windows;
 
-namespace GostControl
+namespace GostControl.AppWindows
 {
     public partial class MainWindow : Window
     {

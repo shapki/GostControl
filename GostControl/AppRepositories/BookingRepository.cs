@@ -2,270 +2,157 @@
 using GostControl.AppServices;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
+using System.Linq;
 
 namespace GostControl.AppRepositories
 {
     public class BookingRepository
     {
-        private readonly DatabaseHelper _dbHelper;
+        private readonly LocalDataService _dataService;
 
         public BookingRepository()
         {
-            _dbHelper = new DatabaseHelper();
+            _dataService = LocalDataService.Instance;
         }
 
         public List<Booking> GetAllBookings()
         {
-            var bookings = new List<Booking>();
-
-            using (var connection = _dbHelper.GetConnection())
-            {
-                connection.Open();
-                string query = @"
-                    SELECT b.BookingID, b.ClientID, b.RoomID, b.BookingDate, 
-                           b.CheckInDate, b.CheckOutDate, b.TotalCost, b.Status, b.Notes,
-                           c.LastName, c.FirstName, c.MiddleName,
-                           r.RoomNumber, rc.CategoryName
-                    FROM Hotel.Bookings b
-                    INNER JOIN Hotel.Clients c ON b.ClientID = c.ClientID
-                    INNER JOIN Hotel.Rooms r ON b.RoomID = r.RoomID
-                    INNER JOIN Hotel.RoomCategories rc ON r.CategoryID = rc.CategoryID
-                    ORDER BY b.BookingDate DESC";
-
-                using (var command = new SqlCommand(query, connection))
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        bookings.Add(new Booking
-                        {
-                            BookingID = reader.GetInt32(reader.GetOrdinal("BookingID")),
-                            ClientID = reader.GetInt32(reader.GetOrdinal("ClientID")),
-                            RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                            BookingDate = reader.GetDateTime(reader.GetOrdinal("BookingDate")),
-                            CheckInDate = reader.GetDateTime(reader.GetOrdinal("CheckInDate")),
-                            CheckOutDate = reader.GetDateTime(reader.GetOrdinal("CheckOutDate")),
-                            TotalCost = reader.IsDBNull(reader.GetOrdinal("TotalCost")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("TotalCost")),
-                            Status = reader.GetString(reader.GetOrdinal("Status")),
-                            Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? null : reader.GetString(reader.GetOrdinal("Notes")),
-                            Client = new Client
-                            {
-                                ClientID = reader.GetInt32(reader.GetOrdinal("ClientID")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                MiddleName = reader.IsDBNull(reader.GetOrdinal("MiddleName")) ? null : reader.GetString(reader.GetOrdinal("MiddleName"))
-                            },
-                            Room = new Room
-                            {
-                                RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                                RoomNumber = reader.GetString(reader.GetOrdinal("RoomNumber"))
-                            }
-                        });
-                    }
-                }
-            }
-
-            return bookings;
+            return _dataService.Bookings.ToList();
         }
 
         public Booking GetBookingById(int bookingId)
         {
-            using (var connection = _dbHelper.GetConnection())
-            {
-                connection.Open();
-                string query = @"
-                    SELECT b.*, c.LastName, c.FirstName, c.MiddleName,
-                           r.RoomNumber, rc.CategoryName
-                    FROM Hotel.Bookings b
-                    INNER JOIN Hotel.Clients c ON b.ClientID = c.ClientID
-                    INNER JOIN Hotel.Rooms r ON b.RoomID = r.RoomID
-                    INNER JOIN Hotel.RoomCategories rc ON r.CategoryID = rc.CategoryID
-                    WHERE b.BookingID = @BookingID";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@BookingID", bookingId);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new Booking
-                            {
-                                BookingID = reader.GetInt32(reader.GetOrdinal("BookingID")),
-                                ClientID = reader.GetInt32(reader.GetOrdinal("ClientID")),
-                                RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                                BookingDate = reader.GetDateTime(reader.GetOrdinal("BookingDate")),
-                                CheckInDate = reader.GetDateTime(reader.GetOrdinal("CheckInDate")),
-                                CheckOutDate = reader.GetDateTime(reader.GetOrdinal("CheckOutDate")),
-                                TotalCost = reader.IsDBNull(reader.GetOrdinal("TotalCost")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("TotalCost")),
-                                Status = reader.GetString(reader.GetOrdinal("Status")),
-                                Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? null : reader.GetString(reader.GetOrdinal("Notes")),
-                                Client = new Client
-                                {
-                                    ClientID = reader.GetInt32(reader.GetOrdinal("ClientID")),
-                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                    MiddleName = reader.IsDBNull(reader.GetOrdinal("MiddleName")) ? null : reader.GetString(reader.GetOrdinal("MiddleName"))
-                                },
-                                Room = new Room
-                                {
-                                    RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                                    RoomNumber = reader.GetString(reader.GetOrdinal("RoomNumber"))
-                                }
-                            };
-                        }
-                        return null;
-                    }
-                }
-            }
+            return _dataService.GetBookingById(bookingId);
         }
 
         public List<Booking> GetBookingsByClient(int clientId)
         {
-            var bookings = new List<Booking>();
+            return _dataService.GetBookingsByClient(clientId);
+        }
 
-            using (var connection = _dbHelper.GetConnection())
-            {
-                connection.Open();
-                string query = @"
-                    SELECT b.*, r.RoomNumber
-                    FROM Hotel.Bookings b
-                    INNER JOIN Hotel.Rooms r ON b.RoomID = r.RoomID
-                    WHERE b.ClientID = @ClientID
-                    ORDER BY b.CheckInDate DESC";
+        public List<Booking> GetActiveBookings()
+        {
+            return _dataService.GetActiveBookings();
+        }
 
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@ClientID", clientId);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            bookings.Add(new Booking
-                            {
-                                BookingID = reader.GetInt32(reader.GetOrdinal("BookingID")),
-                                ClientID = reader.GetInt32(reader.GetOrdinal("ClientID")),
-                                RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                                BookingDate = reader.GetDateTime(reader.GetOrdinal("BookingDate")),
-                                CheckInDate = reader.GetDateTime(reader.GetOrdinal("CheckInDate")),
-                                CheckOutDate = reader.GetDateTime(reader.GetOrdinal("CheckOutDate")),
-                                TotalCost = reader.IsDBNull(reader.GetOrdinal("TotalCost")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("TotalCost")),
-                                Status = reader.GetString(reader.GetOrdinal("Status")),
-                                Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? null : reader.GetString(reader.GetOrdinal("Notes")),
-                                Room = new Room
-                                {
-                                    RoomID = reader.GetInt32(reader.GetOrdinal("RoomID")),
-                                    RoomNumber = reader.GetString(reader.GetOrdinal("RoomNumber"))
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-
-            return bookings;
+        public List<Booking> GetBookingsByDateRange(DateTime startDate, DateTime endDate)
+        {
+            return _dataService.Bookings
+                .Where(b => b.CheckInDate <= endDate && b.CheckOutDate >= startDate)
+                .ToList();
         }
 
         public int AddBooking(Booking booking)
         {
-            using (var connection = _dbHelper.GetConnection())
+            booking.BookingID = _dataService.GetNextBookingId();
+
+            if (booking.ClientID > 0)
             {
-                connection.Open();
-                string query = @"
-                    INSERT INTO Hotel.Bookings 
-                    (ClientID, RoomID, BookingDate, CheckInDate, CheckOutDate, 
-                     TotalCost, Status, Notes)
-                    OUTPUT INSERTED.BookingID
-                    VALUES (@ClientID, @RoomID, @BookingDate, @CheckInDate, @CheckOutDate,
-                            @TotalCost, @Status, @Notes)";
+                booking.Client = _dataService.GetClientById(booking.ClientID);
+            }
 
-                using (var command = new SqlCommand(query, connection))
+            if (booking.RoomID > 0)
+            {
+                booking.Room = _dataService.GetRoomById(booking.RoomID);
+
+                if (booking.Status == "Подтверждено" && booking.Room != null)
                 {
-                    command.Parameters.AddWithValue("@ClientID", booking.ClientID);
-                    command.Parameters.AddWithValue("@RoomID", booking.RoomID);
-                    command.Parameters.AddWithValue("@BookingDate", booking.BookingDate);
-                    command.Parameters.AddWithValue("@CheckInDate", booking.CheckInDate);
-                    command.Parameters.AddWithValue("@CheckOutDate", booking.CheckOutDate);
-                    command.Parameters.Add("@TotalCost", SqlDbType.Decimal).Value =
-                        (object)booking.TotalCost ?? DBNull.Value;
-                    command.Parameters.AddWithValue("@Status", booking.Status);
-                    command.Parameters.Add("@Notes", SqlDbType.NVarChar, 500).Value =
-                        (object)booking.Notes ?? DBNull.Value;
-
-                    return (int)command.ExecuteScalar();
+                    booking.Room.IsAvailable = false;
                 }
             }
+
+            if (booking.BookingDate == DateTime.MinValue)
+            {
+                booking.BookingDate = DateTime.Now;
+            }
+
+            _dataService.Bookings.Add(booking);
+            return booking.BookingID;
         }
 
         public void UpdateBooking(Booking booking)
         {
-            using (var connection = _dbHelper.GetConnection())
+            var existingBooking = _dataService.GetBookingById(booking.BookingID);
+            if (existingBooking != null)
             {
-                connection.Open();
-                string query = @"
-                    UPDATE Hotel.Bookings 
-                    SET ClientID = @ClientID,
-                        RoomID = @RoomID,
-                        BookingDate = @BookingDate,
-                        CheckInDate = @CheckInDate,
-                        CheckOutDate = @CheckOutDate,
-                        TotalCost = @TotalCost,
-                        Status = @Status,
-                        Notes = @Notes
-                    WHERE BookingID = @BookingID";
-
-                using (var command = new SqlCommand(query, connection))
+                if (booking.ClientID > 0 && booking.Client == null)
                 {
-                    command.Parameters.AddWithValue("@BookingID", booking.BookingID);
-                    command.Parameters.AddWithValue("@ClientID", booking.ClientID);
-                    command.Parameters.AddWithValue("@RoomID", booking.RoomID);
-                    command.Parameters.AddWithValue("@BookingDate", booking.BookingDate);
-                    command.Parameters.AddWithValue("@CheckInDate", booking.CheckInDate);
-                    command.Parameters.AddWithValue("@CheckOutDate", booking.CheckOutDate);
-                    command.Parameters.Add("@TotalCost", SqlDbType.Decimal).Value =
-                        (object)booking.TotalCost ?? DBNull.Value;
-                    command.Parameters.AddWithValue("@Status", booking.Status);
-                    command.Parameters.Add("@Notes", SqlDbType.NVarChar, 500).Value =
-                        (object)booking.Notes ?? DBNull.Value;
-
-                    command.ExecuteNonQuery();
+                    booking.Client = _dataService.GetClientById(booking.ClientID);
                 }
+
+                if (booking.RoomID > 0 && booking.Room == null)
+                {
+                    booking.Room = _dataService.GetRoomById(booking.RoomID);
+                }
+
+                if (existingBooking.Status != booking.Status && booking.Room != null)
+                {
+                    if (booking.Status == "Подтверждено" || booking.Status == "Завершено")
+                    {
+                        booking.Room.IsAvailable = false;
+                    }
+                    else if (booking.Status == "Отменено")
+                    {
+                        booking.Room.IsAvailable = true;
+                    }
+                }
+
+                int index = _dataService.Bookings.IndexOf(existingBooking);
+                _dataService.Bookings[index] = booking;
             }
         }
 
         public void DeleteBooking(int bookingId)
         {
-            using (var connection = _dbHelper.GetConnection())
+            var booking = _dataService.GetBookingById(bookingId);
+            if (booking != null)
             {
-                connection.Open();
-                string query = "DELETE FROM Hotel.Bookings WHERE BookingID = @BookingID";
-
-                using (var command = new SqlCommand(query, connection))
+                if (booking.Room != null && booking.Status != "Отменено")
                 {
-                    command.Parameters.AddWithValue("@BookingID", bookingId);
-                    command.ExecuteNonQuery();
+                    booking.Room.IsAvailable = true;
                 }
+
+                _dataService.Bookings.Remove(booking);
             }
         }
 
         public void UpdateBookingStatus(int bookingId, string status)
         {
-            using (var connection = _dbHelper.GetConnection())
+            var booking = _dataService.GetBookingById(bookingId);
+            if (booking != null)
             {
-                connection.Open();
-                string query = "UPDATE Hotel.Bookings SET Status = @Status WHERE BookingID = @BookingID";
+                booking.Status = status;
 
-                using (var command = new SqlCommand(query, connection))
+                if (booking.Room != null)
                 {
-                    command.Parameters.AddWithValue("@BookingID", bookingId);
-                    command.Parameters.AddWithValue("@Status", status);
-                    command.ExecuteNonQuery();
+                    if (status == "Подтверждено" || status == "Завершено")
+                    {
+                        booking.Room.IsAvailable = false;
+                    }
+                    else if (status == "Отменено")
+                    {
+                        booking.Room.IsAvailable = true;
+                    }
                 }
             }
+        }
+
+        public decimal CalculateBookingCost(int bookingId)
+        {
+            var booking = _dataService.GetBookingById(bookingId);
+            if (booking == null)
+                return 0;
+
+            if (booking.Room != null && booking.Room.Category != null)
+            {
+                int days = (booking.CheckOutDate - booking.CheckInDate).Days;
+                if (days > 0)
+                {
+                    return booking.Room.Category.BasePrice * days;
+                }
+            }
+
+            return 0;
         }
     }
 }
