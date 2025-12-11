@@ -74,6 +74,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="AppWindows\EditClientWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AppWindows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -101,6 +105,9 @@
     <Compile Include="AppViewModels\RelayCommand.cs" />
     <Compile Include="AppWindows\AddEditClientWindow.xaml.cs">
       <DependentUpon>AddEditClientWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AppWindows\EditClientWindow.xaml.cs">
+      <DependentUpon>EditClientWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="AppWindows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -137,8 +144,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppDocs\database.sql" />
-    <None Include="Resources\logo.ico" />
-    <None Include="Resources\logo.png" />
+    <Resource Include="Resources\logo.ico" />
+    <Resource Include="Resources\logo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

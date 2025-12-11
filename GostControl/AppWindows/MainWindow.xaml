@@ -9,6 +9,8 @@
         Height="700" Width="1200"
         WindowStartupLocation="CenterScreen"
         Background="#F5F5F5"
+        MinWidth="800"
+        MinHeight="600"
         FontFamily="Segoe UI">
 
     <Window.Resources>
@@ -85,65 +87,10 @@
             <Setter Property="SelectionMode" Value="Single"/>
             <Setter Property="SelectionUnit" Value="FullRow"/>
             <Setter Property="IsReadOnly" Value="True"/>
-            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="DataGrid">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                Background="{TemplateBinding Background}" 
-                                Padding="{TemplateBinding Padding}" 
-                                SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="DG_ScrollViewer" Focusable="false">
-                                <ScrollViewer.Template>
-                                    <ControlTemplate TargetType="ScrollViewer">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="*"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-                                            <Button Command="{x:Static DataGrid.SelectAllCommand}" 
-                                                    Width="{Binding CellsPanelHorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" 
-                                                    Focusable="false" 
-                                                    Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.All}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" 
-                                                    Background="Transparent" 
-                                                    BorderThickness="0" 
-                                                    Padding="0">
-                                                <Button.Template>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Grid>
-                                                            <Rectangle x:Name="Border" Fill="{TemplateBinding Background}" SnapsToDevicePixels="True"/>
-                                                            <Polygon x:Name="Arrow" Fill="Black" Opacity="0.15" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Points="0,5 5,0 10,5"/>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Button.Template>
-                                            </Button>
-                                            <DataGridColumnHeadersPresenter x:Name="PART_ColumnHeadersPresenter" Grid.Column="1" Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.Column}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"/>
-                                            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" CanContentScroll="{TemplateBinding CanContentScroll}" Grid.ColumnSpan="2" Grid.Row="1"/>
-                                            <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="2" Maximum="{TemplateBinding ScrollableHeight}" Orientation="Vertical" Grid.Row="1" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}"/>
-                                            <Grid Grid.Column="1" Grid.Row="2">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="{Binding NonFrozenColumnsViewportHorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Column="1" Maximum="{TemplateBinding ScrollableWidth}" Orientation="Horizontal" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}"/>
-                                            </Grid>
-                                        </Grid>
-                                    </ControlTemplate>
-                                </ScrollViewer.Template>
-                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                            </ScrollViewer>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         </Style>
 
         <!-- Стиль для заголовков столбцов DataGrid -->
@@ -225,7 +172,14 @@
 
                 <!-- Логотип -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
-                    <TextBlock Text="🏨" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <!-- Изображение логотипа -->
+                    <Image Source="/Resources/logo.png"
+                           Width="32" 
+                           Height="32" 
+                           VerticalAlignment="Center" 
+                           Margin="0,0,10,0"/>
+    
+                    <!-- Текст логотипа -->
                     <TextBlock Text="ГОСТКОНТРОЛЬ" 
                                Foreground="White" 
                                FontSize="22" 
@@ -270,10 +224,10 @@
                                 Background="#2196F3"/>
 
                         <Button Content="✏️ Редактировать" 
-                                Command="{Binding EditClientCommand}" 
-                                Style="{StaticResource ModernButton}"
-                                Width="140" Margin="10,0,10,0"
-                                IsEnabled="{Binding SelectedClient, Converter={StaticResource NullToBoolConverter}}"/>
+                            Command="{Binding EditClientCommand}" 
+                            Style="{StaticResource ModernButton}"
+                            Width="140" Margin="10,0,10,0"
+                            IsEnabled="{Binding SelectedClient, Converter={StaticResource NullToBoolConverter}}"/>
 
                         <Button Content="🗑️ Удалить" 
                                 Command="{Binding DeleteClientCommand}" 
@@ -332,46 +286,64 @@
 
                     <!-- DataGrid -->
                     <DataGrid Grid.Row="1" 
-                              ItemsSource="{Binding Clients}"
-                              SelectedItem="{Binding SelectedClient}"
-                              Style="{StaticResource ModernDataGrid}"
-                              ColumnHeaderStyle="{StaticResource ColumnHeaderStyle}"
-                              RowStyle="{StaticResource DataGridRowStyle}"
-                              CellStyle="{StaticResource DataGridCellStyle}"
-                              Margin="0">
+                      ItemsSource="{Binding Clients}"
+                      SelectedItem="{Binding SelectedClient}"
+                      Style="{StaticResource ModernDataGrid}"
+                      ColumnHeaderStyle="{StaticResource ColumnHeaderStyle}"
+                      RowStyle="{StaticResource DataGridRowStyle}"
+                      CellStyle="{StaticResource DataGridCellStyle}"
+                      Margin="0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Stretch"
+                      MouseDoubleClick="DataGrid_MouseDoubleClick">
+
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID" 
-                                                Binding="{Binding ClientID}" 
-                                                Width="60"
-                                                ElementStyle="{StaticResource CenterTextStyle}"/>
+                            Binding="{Binding ClientID}" 
+                            Width="60"
+                            CanUserResize="False">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
 
                             <DataGridTextColumn Header="Фамилия" 
-                                                Binding="{Binding LastName}" 
-                                                Width="120"/>
+                            Binding="{Binding LastName}" 
+                            Width="1.2*"
+                            MinWidth="120"/>
 
                             <DataGridTextColumn Header="Имя" 
-                                                Binding="{Binding FirstName}" 
-                                                Width="120"/>
+                            Binding="{Binding FirstName}" 
+                            Width="1.2*"
+                            MinWidth="120"/>
 
                             <DataGridTextColumn Header="Отчество" 
-                                                Binding="{Binding MiddleName}" 
-                                                Width="120"/>
+                            Binding="{Binding MiddleName}" 
+                            Width="1.2*"
+                            MinWidth="120"/>
 
                             <DataGridTextColumn Header="Телефон" 
-                                                Binding="{Binding PhoneNumber}" 
-                                                Width="150"/>
+                            Binding="{Binding PhoneNumber}" 
+                            Width="1.5*"
+                            MinWidth="150"/>
 
                             <DataGridTextColumn Header="Email" 
-                                                Binding="{Binding Email}" 
-                                                Width="200"/>
+                            Binding="{Binding Email}" 
+                            Width="2*"
+                            MinWidth="200"/>
 
                             <DataGridTextColumn Header="Дата рождения" 
-                                                Binding="{Binding DateOfBirth, StringFormat=dd.MM.yyyy}" 
-                                                Width="110"/>
+                            Binding="{Binding DateOfBirth, StringFormat=dd.MM.yyyy}" 
+                            MinWidth="110"
+                            CanUserResize="False"/>
 
                             <DataGridTextColumn Header="Дата регистрации" 
-                                                Binding="{Binding RegistrationDate, StringFormat=dd.MM.yyyy}" 
-                                                Width="120"/>
+                            Binding="{Binding RegistrationDate, StringFormat=dd.MM.yyyy}" 
+                            Width="*"
+                            MinWidth="120"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
