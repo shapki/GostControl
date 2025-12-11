@@ -110,7 +110,7 @@ namespace GostControl.AppViewModels
             }
         }
 
-        private void EditClient(object parameter)
+        public void EditClient(object parameter)
         {
             try
             {

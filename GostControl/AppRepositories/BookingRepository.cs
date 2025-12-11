@@ -27,7 +27,11 @@ namespace GostControl.AppRepositories
 
         public List<Booking> GetBookingsByClient(int clientId)
         {
-            return _dataService.GetBookingsByClient(clientId);
+            if (clientId <= 0) return new List<Booking>();
+
+            return _dataService.Bookings
+                .Where(b => b.ClientID == clientId)
+                .ToList();
         }
 
         public List<Booking> GetActiveBookings()

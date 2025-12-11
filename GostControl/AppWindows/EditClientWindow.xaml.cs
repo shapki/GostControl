@@ -14,6 +14,15 @@ namespace GostControl.AppWindows
         private readonly ClientRepository _clientRepository;
         private readonly BookingRepository _bookingRepository;
 
+        private string _originalLastName;
+        private string _originalFirstName;
+        private string _originalMiddleName;
+        private string _originalPhone;
+        private string _originalEmail;
+        private string _originalPassportSeries;
+        private string _originalPassportNumber;
+        private DateTime? _originalDateOfBirth;
+
         public EditClientWindow(Client client)
         {
             InitializeComponent();
@@ -22,50 +31,87 @@ namespace GostControl.AppWindows
             _clientRepository = new ClientRepository();
             _bookingRepository = new BookingRepository();
 
+            SaveOriginalValues();
+
             SaveButton.Click += SaveButton_Click;
             CancelButton.Click += CancelButton_Click;
 
             LoadClientData();
             SetupValidation();
+        }
 
-            if (client.ClientID == 0)
-            {
-                RegistrationDateText.Text = "Будет установлена автоматически";
-                BookingsCountText.Text = "0";
-                Title = "Добавление нового клиента";
-            }
+        private void SaveOriginalValues()
+        {
+            _originalLastName = _client.LastName;
+            _originalFirstName = _client.FirstName;
+            _originalMiddleName = _client.MiddleName;
+            _originalPhone = _client.PhoneNumber;
+            _originalEmail = _client.Email;
+            _originalPassportSeries = _client.PassportSeries;
+            _originalPassportNumber = _client.PassportNumber;
+            _originalDateOfBirth = _client.DateOfBirth;
         }
 
         private void LoadClientData()
         {
             try
             {
-                ClientIdText.Text = _client.ClientID.ToString();
+                ClientIdText.Text = _client.ClientID > 0 ? _client.ClientID.ToString() : "Новый";
 
-                LastNameTextBox.Text = _client.LastName;
-                FirstNameTextBox.Text = _client.FirstName;
-                MiddleNameTextBox.Text = _client.MiddleName;
-                PhoneTextBox.Text = _client.PhoneNumber;
-                EmailTextBox.Text = _client.Email;
-                PassportSeriesTextBox.Text = _client.PassportSeries;
-                PassportNumberTextBox.Text = _client.PassportNumber;
-
-                if (_client.DateOfBirth.HasValue)
+                if (_client.ClientID == 0)
                 {
-                    BirthDatePicker.SelectedDate = _client.DateOfBirth.Value;
+                    Title = "Добавление нового клиента";
+                }
+                else
+                {
+                    Title = $"Редактирование клиента #{_client.ClientID}";
                 }
 
-                RegistrationDateText.Text = _client.RegistrationDate.ToString("dd.MM.yyyy HH:mm");
+                LastNameTextBox.Text = _originalLastName ?? "";
+                FirstNameTextBox.Text = _originalFirstName ?? "";
+                MiddleNameTextBox.Text = _originalMiddleName ?? "";
+                PhoneTextBox.Text = _originalPhone ?? "";
+                EmailTextBox.Text = _originalEmail ?? "";
+                PassportSeriesTextBox.Text = _originalPassportSeries ?? "";
+                PassportNumberTextBox.Text = _originalPassportNumber ?? "";
 
-                var bookingsCount = _bookingRepository.GetBookingsByClient(_client.ClientID).Count;
-                BookingsCountText.Text = bookingsCount.ToString();
+                if (_originalDateOfBirth.HasValue)
+                {
+                    BirthDatePicker.SelectedDate = _originalDateOfBirth.Value;
+                }
+                else
+                {
+                    BirthDatePicker.SelectedDate = null;
+                }
+
+                if (_client.ClientID > 0)
+                {
+                    RegistrationDateText.Text = _client.RegistrationDate.ToString("dd.MM.yyyy");
+                }
+                else
+                {
+                    RegistrationDateText.Text = "Будет установлена автоматически";
+                }
+
+                if (_client.ClientID > 0)
+                {
+                    var bookingsCount = _bookingRepository.GetBookingsByClient(_client.ClientID).Count;
+                    BookingsCountText.Text = bookingsCount.ToString();
+                }
+                else
+                {
+                    BookingsCountText.Text = "0";
+                }
 
                 LastNameTextBox.Focus();
                 LastNameTextBox.SelectAll();
+
+                UpdateSaveButton();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -82,7 +128,8 @@ namespace GostControl.AppWindows
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка настройки валидации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка настройки валидации: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -142,7 +189,8 @@ namespace GostControl.AppWindows
                 if (string.IsNullOrWhiteSpace(phone))
                     return false;
 
-                return phone.Length >= 5;
+                string digitsOnly = new string(phone.Where(char.IsDigit).ToArray());
+                return digitsOnly.Length >= 5;
             }
             catch
             {
@@ -157,7 +205,7 @@ namespace GostControl.AppWindows
                 if (string.IsNullOrWhiteSpace(email))
                     return true;
 
-                return email.Contains("@") && email.Contains(".");
+                return email.Contains("@") && email.Contains(".") && email.Length > 5;
             }
             catch
             {
@@ -198,14 +246,14 @@ namespace GostControl.AppWindows
         {
             try
             {
-                return _client.LastName != LastNameTextBox.Text ||
-                       _client.FirstName != FirstNameTextBox.Text ||
-                       _client.MiddleName != MiddleNameTextBox.Text ||
-                       _client.PassportSeries != PassportSeriesTextBox.Text ||
-                       _client.PassportNumber != PassportNumberTextBox.Text ||
-                       _client.PhoneNumber != PhoneTextBox.Text ||
-                       _client.Email != EmailTextBox.Text ||
-                       _client.DateOfBirth != BirthDatePicker.SelectedDate;
+                return _originalLastName != LastNameTextBox.Text ||
+                       _originalFirstName != FirstNameTextBox.Text ||
+                       _originalMiddleName != MiddleNameTextBox.Text ||
+                       _originalPassportSeries != PassportSeriesTextBox.Text ||
+                       _originalPassportNumber != PassportNumberTextBox.Text ||
+                       _originalPhone != PhoneTextBox.Text ||
+                       _originalEmail != EmailTextBox.Text ||
+                       _originalDateOfBirth != BirthDatePicker.SelectedDate;
             }
             catch
             {
@@ -220,13 +268,13 @@ namespace GostControl.AppWindows
                 if (!SaveButton.IsEnabled)
                     return;
 
-                _client.LastName = LastNameTextBox.Text;
-                _client.FirstName = FirstNameTextBox.Text;
-                _client.MiddleName = MiddleNameTextBox.Text;
-                _client.PhoneNumber = PhoneTextBox.Text;
-                _client.Email = EmailTextBox.Text;
-                _client.PassportSeries = PassportSeriesTextBox.Text;
-                _client.PassportNumber = PassportNumberTextBox.Text;
+                _client.LastName = LastNameTextBox.Text.Trim();
+                _client.FirstName = FirstNameTextBox.Text.Trim();
+                _client.MiddleName = MiddleNameTextBox.Text.Trim();
+                _client.PhoneNumber = PhoneTextBox.Text.Trim();
+                _client.Email = EmailTextBox.Text.Trim();
+                _client.PassportSeries = PassportSeriesTextBox.Text.Trim();
+                _client.PassportNumber = PassportNumberTextBox.Text.Trim();
                 _client.DateOfBirth = BirthDatePicker.SelectedDate;
 
                 if (_client.ClientID == 0)
