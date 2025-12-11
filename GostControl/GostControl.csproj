@@ -136,6 +136,7 @@
     <None Include="AppDocs\!2_Otzuv.docx" />
     <None Include="AppDocs\!3_Kursov_zadan_titul.docx" />
     <None Include="AppDocs\!4_Kursov_zadan_nachinka.docx" />
+    <None Include="AppDocs\database_diagram.pdf" />
     <None Include="AppDocs\ПЗ_Шапкин_ИП-22-7к.docx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -148,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppDocs\database.sql" />
+    <Resource Include="AppDocs\database_diagram.png" />
     <Resource Include="Resources\logo.ico" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
