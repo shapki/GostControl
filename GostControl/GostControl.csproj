@@ -132,6 +132,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="AppDocs\!1_List_utvergdenia.docx" />
+    <None Include="AppDocs\!2_Otzuv.docx" />
+    <None Include="AppDocs\!3_Kursov_zadan_titul.docx" />
+    <None Include="AppDocs\!4_Kursov_zadan_nachinka.docx" />
     <None Include="AppDocs\ПЗ_Шапкин_ИП-22-7к.docx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
