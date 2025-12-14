@@ -1,162 +1,118 @@
-﻿using GostControl.AppModels;
-using GostControl.AppServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using GostControl.AppModels;
+using GostControl.AppData;
 
 namespace GostControl.AppRepositories
 {
-    public class BookingRepository
+    public interface IBookingRepository : IDisposable
     {
-        private readonly LocalDataService _dataService;
+        List<Booking> GetBookingsByClient(int clientId);
+        List<Booking> GetActiveBookings();
+        int GetBookingsCountByClient(int clientId);
+        void AddBooking(Booking booking);
+    }
+
+    public class BookingRepository : IBookingRepository
+    {
+        private readonly HotelDbContext _context;
+        private bool _disposed = false;
 
         public BookingRepository()
         {
-            _dataService = LocalDataService.Instance;
+            _context = new HotelDbContext();
         }
 
-        public List<Booking> GetAllBookings()
+        public BookingRepository(HotelDbContext context)
         {
-            return _dataService.Bookings.ToList();
-        }
-
-        public Booking GetBookingById(int bookingId)
-        {
-            return _dataService.GetBookingById(bookingId);
+            _context = context;
         }
 
         public List<Booking> GetBookingsByClient(int clientId)
         {
-            if (clientId <= 0) return new List<Booking>();
-
-            return _dataService.Bookings
-                .Where(b => b.ClientID == clientId)
-                .ToList();
+            try
+            {
+                return _context.Bookings
+                    .Include(b => b.Room)
+                    .ThenInclude(r => r.Category)
+                    .Include(b => b.BookingServices)
+                    .ThenInclude(bs => bs.Service)
+                    .Where(b => b.ClientID == clientId)
+                    .OrderByDescending(b => b.BookingDate)
+                    .AsNoTracking()
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Ошибка при получении бронирований клиента: {ex.Message}", ex);
+            }
         }
 
         public List<Booking> GetActiveBookings()
         {
-            return _dataService.GetActiveBookings();
-        }
-
-        public List<Booking> GetBookingsByDateRange(DateTime startDate, DateTime endDate)
-        {
-            return _dataService.Bookings
-                .Where(b => b.CheckInDate <= endDate && b.CheckOutDate >= startDate)
-                .ToList();
-        }
-
-        public int AddBooking(Booking booking)
-        {
-            booking.BookingID = _dataService.GetNextBookingId();
-
-            if (booking.ClientID > 0)
+            try
             {
-                booking.Client = _dataService.GetClientById(booking.ClientID);
+                var today = DateTime.Today;
+
+                return _context.Bookings
+                    .Include(b => b.Client)
+                    .Include(b => b.Room)
+                    .Where(b => b.Status == "Подтверждено" &&
+                               b.CheckInDate <= today &&
+                               b.CheckOutDate >= today)
+                    .OrderBy(b => b.CheckInDate)
+                    .AsNoTracking()
+                    .ToList();
             }
-
-            if (booking.RoomID > 0)
+            catch (Exception ex)
             {
-                booking.Room = _dataService.GetRoomById(booking.RoomID);
-
-                if (booking.Status == "Подтверждено" && booking.Room != null)
-                {
-                    booking.Room.IsAvailable = false;
-                }
-            }
-
-            if (booking.BookingDate == DateTime.MinValue)
-            {
-                booking.BookingDate = DateTime.Now;
-            }
-
-            _dataService.Bookings.Add(booking);
-            return booking.BookingID;
-        }
-
-        public void UpdateBooking(Booking booking)
-        {
-            var existingBooking = _dataService.GetBookingById(booking.BookingID);
-            if (existingBooking != null)
-            {
-                if (booking.ClientID > 0 && booking.Client == null)
-                {
-                    booking.Client = _dataService.GetClientById(booking.ClientID);
-                }
-
-                if (booking.RoomID > 0 && booking.Room == null)
-                {
-                    booking.Room = _dataService.GetRoomById(booking.RoomID);
-                }
-
-                if (existingBooking.Status != booking.Status && booking.Room != null)
-                {
-                    if (booking.Status == "Подтверждено" || booking.Status == "Завершено")
-                    {
-                        booking.Room.IsAvailable = false;
-                    }
-                    else if (booking.Status == "Отменено")
-                    {
-                        booking.Room.IsAvailable = true;
-                    }
-                }
-
-                int index = _dataService.Bookings.IndexOf(existingBooking);
-                _dataService.Bookings[index] = booking;
+                throw new ApplicationException($"Ошибка при получении активных бронирований: {ex.Message}", ex);
             }
         }
 
-        public void DeleteBooking(int bookingId)
+        public int GetBookingsCountByClient(int clientId)
         {
-            var booking = _dataService.GetBookingById(bookingId);
-            if (booking != null)
+            try
             {
-                if (booking.Room != null && booking.Status != "Отменено")
-                {
-                    booking.Room.IsAvailable = true;
-                }
-
-                _dataService.Bookings.Remove(booking);
+                return _context.Bookings.Count(b => b.ClientID == clientId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Ошибка при подсчете бронирований клиента: {ex.Message}", ex);
             }
         }
 
-        public void UpdateBookingStatus(int bookingId, string status)
+        public void AddBooking(Booking booking)
         {
-            var booking = _dataService.GetBookingById(bookingId);
-            if (booking != null)
+            try
             {
-                booking.Status = status;
-
-                if (booking.Room != null)
-                {
-                    if (status == "Подтверждено" || status == "Завершено")
-                    {
-                        booking.Room.IsAvailable = false;
-                    }
-                    else if (status == "Отменено")
-                    {
-                        booking.Room.IsAvailable = true;
-                    }
-                }
+                _context.Bookings.Add(booking);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Ошибка при добавлении бронирования: {ex.Message}", ex);
             }
         }
 
-        public decimal CalculateBookingCost(int bookingId)
+        protected virtual void Dispose(bool disposing)
         {
-            var booking = _dataService.GetBookingById(bookingId);
-            if (booking == null)
-                return 0;
-
-            if (booking.Room != null && booking.Room.Category != null)
+            if (!_disposed)
             {
-                int days = (booking.CheckOutDate - booking.CheckInDate).Days;
-                if (days > 0)
+                if (disposing)
                 {
-                    return booking.Room.Category.BasePrice * days;
+                    _context?.Dispose();
                 }
+                _disposed = true;
             }
+        }
 
-            return 0;
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

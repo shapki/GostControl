@@ -1,66 +1,61 @@
-﻿using GostControl.AppModels;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
+using GostControl.AppModels;
 
 namespace GostControl.AppWindows
 {
     public partial class AddEditClientWindow : Window
     {
-        private readonly Client _client;
-        private readonly bool _isNew;
+        public Client Client { get; private set; }
 
-        public AddEditClientWindow(Client client, bool isNew)
+        public AddEditClientWindow()
         {
             InitializeComponent();
-            _client = client;
-            _isNew = isNew;
-
-            Title = _isNew ? "Добавление клиента" : "Редактирование клиента";
-            LoadClientData();
+            Client = new Client();
+            TitleText.Text = "Добавление клиента";
         }
 
-        private void LoadClientData()
+        public AddEditClientWindow(Client clientToEdit) : this()
         {
-            Title = _isNew ? "Добавление клиента" : "Редактирование клиента";
+            if (clientToEdit == null)
+                throw new ArgumentNullException(nameof(clientToEdit));
 
-            var titleText = this.FindName("TitleText") as TextBlock;
-            if (titleText != null)
-            {
-                titleText.Text = _isNew ? "Добавление клиента" : "Редактирование клиента";
-            }
+            TitleText.Text = "Редактирование клиента";
 
-            LastNameTextBox.Text = _client.LastName;
-            FirstNameTextBox.Text = _client.FirstName;
-            MiddleNameTextBox.Text = _client.MiddleName;
-            PassportSeriesTextBox.Text = _client.PassportSeries;
-            PassportNumberTextBox.Text = _client.PassportNumber;
-            PhoneTextBox.Text = _client.PhoneNumber;
-            EmailTextBox.Text = _client.Email;
+            LastNameTextBox.Text = clientToEdit.LastName ?? "";
+            FirstNameTextBox.Text = clientToEdit.FirstName ?? "";
+            MiddleNameTextBox.Text = clientToEdit.MiddleName ?? "";
+            BirthDatePicker.SelectedDate = clientToEdit.DateOfBirth;
+            PhoneTextBox.Text = clientToEdit.PhoneNumber ?? "";
+            EmailTextBox.Text = clientToEdit.Email ?? "";
+            PassportSeriesTextBox.Text = clientToEdit.PassportSeries ?? "";
+            PassportNumberTextBox.Text = clientToEdit.PassportNumber ?? "";
 
-            if (_client.DateOfBirth.HasValue)
-            {
-                BirthDatePicker.SelectedDate = _client.DateOfBirth.Value;
-            }
+            Client.ClientID = clientToEdit.ClientID;
+            Client.RegistrationDate = clientToEdit.RegistrationDate;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(LastNameTextBox.Text) ||
-                string.IsNullOrWhiteSpace(FirstNameTextBox.Text))
+                string.IsNullOrWhiteSpace(FirstNameTextBox.Text) ||
+                string.IsNullOrWhiteSpace(PhoneTextBox.Text))
             {
-                MessageBox.Show("Заполните обязательные поля: Фамилия и Имя",
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Заполните обязательные поля: Фамилия, Имя, Телефон.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            _client.LastName = LastNameTextBox.Text;
-            _client.FirstName = FirstNameTextBox.Text;
-            _client.MiddleName = MiddleNameTextBox.Text;
-            _client.PassportSeries = PassportSeriesTextBox.Text;
-            _client.PassportNumber = PassportNumberTextBox.Text;
-            _client.PhoneNumber = PhoneTextBox.Text;
-            _client.Email = EmailTextBox.Text;
-            _client.DateOfBirth = BirthDatePicker.SelectedDate;
+            Client.LastName = LastNameTextBox.Text.Trim();
+            Client.FirstName = FirstNameTextBox.Text.Trim();
+            Client.MiddleName = MiddleNameTextBox.Text?.Trim();
+            Client.DateOfBirth = BirthDatePicker.SelectedDate;
+            Client.PhoneNumber = PhoneTextBox.Text.Trim();
+            Client.Email = EmailTextBox.Text?.Trim();
+            Client.PassportSeries = PassportSeriesTextBox.Text?.Trim();
+            Client.PassportNumber = PassportNumberTextBox.Text?.Trim();
+
+            if (Client.RegistrationDate == default)
+                Client.RegistrationDate = DateTime.Now;
 
             DialogResult = true;
             Close();

@@ -1,66 +1,105 @@
-﻿using GostControl.AppModels;
-using GostControl.AppServices;
+﻿using GostControl.AppData;
+using GostControl.AppModels;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GostControl.AppRepositories
 {
-    public class RoomCategoryRepository
+    public interface IRoomCategoryRepository : IDisposable
     {
-        private readonly LocalDataService _dataService;
+        List<RoomCategory> GetAllCategories();
+        RoomCategory GetCategoryById(int categoryId);
+        int AddCategory(RoomCategory category);
+        void UpdateCategory(RoomCategory category);
+        void DeleteCategory(int categoryId);
+        RoomCategory GetCategoryByName(string categoryName);
+    }
+
+    public class RoomCategoryRepository : IRoomCategoryRepository
+    {
+        private readonly HotelDbContext _context;
+        private bool _disposed = false;
 
         public RoomCategoryRepository()
         {
-            _dataService = LocalDataService.Instance;
+            _context = new HotelDbContext();
+        }
+
+        public RoomCategoryRepository(HotelDbContext context)
+        {
+            _context = context;
         }
 
         public List<RoomCategory> GetAllCategories()
         {
-            return _dataService.RoomCategories.ToList();
+            return _context.RoomCategories
+                .AsNoTracking()
+                .OrderBy(c => c.CategoryName)
+                .ToList();
         }
 
         public RoomCategory GetCategoryById(int categoryId)
         {
-            return _dataService.GetCategoryById(categoryId);
+            return _context.RoomCategories
+                .AsNoTracking()
+                .FirstOrDefault(c => c.CategoryID == categoryId);
         }
 
         public int AddCategory(RoomCategory category)
         {
-            category.CategoryID = _dataService.RoomCategories.Any() ?
-                _dataService.RoomCategories.Max(c => c.CategoryID) + 1 : 1;
-            _dataService.RoomCategories.Add(category);
+            _context.RoomCategories.Add(category);
+            _context.SaveChanges();
             return category.CategoryID;
         }
 
         public void UpdateCategory(RoomCategory category)
         {
-            var existingCategory = _dataService.GetCategoryById(category.CategoryID);
-            if (existingCategory != null)
-            {
-                int index = _dataService.RoomCategories.IndexOf(existingCategory);
-                _dataService.RoomCategories[index] = category;
-            }
+            _context.Entry(category).State = EntityState.Modified;
+            _context.SaveChanges();
         }
 
         public void DeleteCategory(int categoryId)
         {
-            var category = _dataService.GetCategoryById(categoryId);
+            var category = _context.RoomCategories.Find(categoryId);
             if (category != null)
             {
-                var roomsWithCategory = _dataService.Rooms.Where(r => r.CategoryID == categoryId).ToList();
-                if (roomsWithCategory.Any())
+                // Есть ли номера с этой категорией
+                var roomsWithCategory = _context.Rooms.Any(r => r.CategoryID == categoryId);
+                if (roomsWithCategory)
                 {
-                    throw new System.Exception("Нельзя удалить категорию, так как существуют номера с этой категорией");
+                    throw new InvalidOperationException("Нельзя удалить категорию, так как существуют номера с этой категорией");
                 }
 
-                _dataService.RoomCategories.Remove(category);
+                _context.RoomCategories.Remove(category);
+                _context.SaveChanges();
             }
         }
 
         public RoomCategory GetCategoryByName(string categoryName)
         {
-            return _dataService.RoomCategories
+            return _context.RoomCategories
+                .AsNoTracking()
                 .FirstOrDefault(c => c.CategoryName.ToLower() == categoryName.ToLower());
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _context?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
