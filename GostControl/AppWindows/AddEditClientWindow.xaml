@@ -2,162 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Добавление/Редактирование клиента" 
-        Height="650" Width="500"
+        Height="700" Width="520"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#F5F5F5"
         FontFamily="Segoe UI">
-
-    <Window.Resources>
-        <!-- Стиль для заголовков полей -->
-        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#424242"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
-        </Style>
-
-        <!-- Стиль для TextBox -->
-        <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <!-- Правильный PART_ContentHost для TextBox -->
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
-                            </Trigger>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
-                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#F5F5F5"/>
-                                <Setter TargetName="border" Property="BorderBrush" Value="#E0E0E0"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Стиль для DatePicker -->
-        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="DatePicker">
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <DatePickerTextBox x:Name="PART_TextBox"
-                                       Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Padding="10"
-                                       Background="Transparent"
-                                       BorderThickness="0"
-                                       HorizontalContentAlignment="Left"/>
-
-                                <Button x:Name="PART_Button"
-                                        Grid.Column="1"
-                                        Width="40"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Content="📅"
-                                        FontSize="16"/>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
-                            </Trigger>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
-                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Стиль для кнопок -->
-        <Style x:Key="DialogButton" TargetType="Button">
-            <Setter Property="Background" Value="#2196F3"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="44"/>
-            <Setter Property="Width" Value="120"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#1976D2"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#BDBDBD"/>
-                                <Setter Property="Foreground" Value="#757575"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Стиль для кнопки отмены -->
-        <Style x:Key="CancelButton" TargetType="Button" BasedOn="{StaticResource DialogButton}">
-            <Setter Property="Background" Value="#F5F5F5"/>
-            <Setter Property="Foreground" Value="#424242"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#E0E0E0"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -201,109 +50,298 @@
         <!-- Форма -->
         <Border Grid.Row="1" Background="White" Margin="20" CornerRadius="8"
                 BorderBrush="#E0E0E0" BorderThickness="1">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="30">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="25">
                 <StackPanel>
 
                     <!-- Личные данные -->
-                    <TextBlock Text="Личные данные" 
-                               Style="{StaticResource FieldLabelStyle}"
-                               FontSize="16"
-                               Margin="0,0,0,20"/>
+                    <Border Background="#F5F9FF" 
+                            CornerRadius="6" 
+                            Padding="18,15" 
+                            Margin="0,0,0,18">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="👤" 
+                                           FontSize="16" 
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="Личные данные" 
+                                           Foreground="#1976D2"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
 
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Фамилия -->
-                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,20">
-                            <TextBlock Text="Фамилия *" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox x:Name="LastNameTextBox" Style="{StaticResource ModernTextBox}"/>
+                                <!-- Фамилия -->
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,15">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Фамилия" 
+                                                   Foreground="#424242"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,5,5"/>
+                                        <TextBlock Text="*" 
+                                                   Foreground="#D32F2F"
+                                                   FontSize="14"
+                                                   FontWeight="Bold"
+                                                   Margin="0,0,0,5"/>
+                                    </StackPanel>
+                                    <TextBox x:Name="LastNameTextBox" 
+                                             Background="White"
+                                             BorderBrush="#E0E0E0"
+                                             BorderThickness="1"
+                                             Height="40"
+                                             Padding="10"
+                                             FontSize="14"
+                                             VerticalContentAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Имя -->
+                                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,15">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Имя" 
+                                                   Foreground="#424242"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,5,5"/>
+                                        <TextBlock Text="*" 
+                                                   Foreground="#D32F2F"
+                                                   FontSize="14"
+                                                   FontWeight="Bold"
+                                                   Margin="0,0,0,5"/>
+                                    </StackPanel>
+                                    <TextBox x:Name="FirstNameTextBox" 
+                                             Background="White"
+                                             BorderBrush="#E0E0E0"
+                                             BorderThickness="1"
+                                             Height="40"
+                                             Padding="10"
+                                             FontSize="14"
+                                             VerticalContentAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Отчество -->
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,15">
+                                    <TextBlock Text="Отчество" 
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,5"/>
+                                    <TextBox x:Name="MiddleNameTextBox" 
+                                             Background="White"
+                                             BorderBrush="#E0E0E0"
+                                             BorderThickness="1"
+                                             Height="40"
+                                             Padding="10"
+                                             FontSize="14"
+                                             VerticalContentAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Дата рождения -->
+                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
+                                    <TextBlock Text="Дата рождения" 
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,5"/>
+                                    <DatePicker x:Name="BirthDatePicker"
+                                                Background="White"
+                                                BorderBrush="#E0E0E0"
+                                                BorderThickness="1"
+                                                Height="40"
+                                                Padding="10"
+                                                FontSize="14"
+                                                VerticalContentAlignment="Center"
+                                                SelectedDateFormat="Short"
+                                                IsTodayHighlighted="True"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
-
-                        <!-- Имя -->
-                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,20">
-                            <TextBlock Text="Имя *" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox x:Name="FirstNameTextBox" Style="{StaticResource ModernTextBox}"/>
-                        </StackPanel>
-
-                        <!-- Отчество -->
-                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,20">
-                            <TextBlock Text="Отчество" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox x:Name="MiddleNameTextBox" Style="{StaticResource ModernTextBox}"/>
-                        </StackPanel>
-
-                        <!-- Дата рождения -->
-                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,20">
-                            <TextBlock Text="Дата рождения" Style="{StaticResource FieldLabelStyle}"/>
-                            <DatePicker x:Name="BirthDatePicker"
-                                Style="{StaticResource ModernDatePicker}"
-                                SelectedDateFormat="Short"
-                                IsTodayHighlighted="True"/>
-                        </StackPanel>
-                    </Grid>
+                    </Border>
 
                     <!-- Контактная информация -->
-                    <TextBlock Text="Контактная информация" 
-                               Style="{StaticResource FieldLabelStyle}"
-                               FontSize="16"
-                               Margin="0,20,0,20"/>
+                    <Border Background="#F5F5FF" 
+                            CornerRadius="6" 
+                            Padding="18,15" 
+                            Margin="0,0,0,18">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="📞" 
+                                           FontSize="16" 
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="Контактная информация" 
+                                           Foreground="#5C6BC0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
 
-                    <StackPanel Margin="0,0,0,20">
-                        <TextBlock Text="Телефон *" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox x:Name="PhoneTextBox" Style="{StaticResource ModernTextBox}"/>
-                    </StackPanel>
+                            <StackPanel Margin="0,0,0,15">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Телефон" 
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,5,5"/>
+                                    <TextBlock Text="*" 
+                                               Foreground="#D32F2F"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,5"/>
+                                </StackPanel>
+                                <TextBox x:Name="PhoneTextBox" 
+                                         Background="White"
+                                         BorderBrush="#E0E0E0"
+                                         BorderThickness="1"
+                                         Height="40"
+                                         Padding="10"
+                                         FontSize="14"
+                                         VerticalContentAlignment="Center"/>
+                            </StackPanel>
 
-                    <StackPanel Margin="0,0,0,20">
-                        <TextBlock Text="Email" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox x:Name="EmailTextBox" Style="{StaticResource ModernTextBox}"/>
-                    </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Email" 
+                                           Foreground="#424242"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="EmailTextBox" 
+                                         Background="White"
+                                         BorderBrush="#E0E0E0"
+                                         BorderThickness="1"
+                                         Height="40"
+                                         Padding="10"
+                                         FontSize="14"
+                                         VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
                     <!-- Паспортные данные -->
-                    <TextBlock Text="Паспортные данные" 
-                               Style="{StaticResource FieldLabelStyle}"
-                               FontSize="16"
-                               Margin="0,20,0,20"/>
+                    <Border Background="#F7FFF5" 
+                            CornerRadius="6" 
+                            Padding="18,15" 
+                            Margin="0,0,0,18">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="📄" 
+                                           FontSize="16" 
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="Паспортные данные" 
+                                           Foreground="#388E3C"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
 
-                    <Grid Margin="0,0,0,20">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Серия паспорта" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox x:Name="PassportSeriesTextBox" 
-                                     Style="{StaticResource ModernTextBox}"
-                                     MaxLength="4"/>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Серия паспорта" 
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,5"/>
+                                    <TextBox x:Name="PassportSeriesTextBox" 
+                                             Background="White"
+                                             BorderBrush="#E0E0E0"
+                                             BorderThickness="1"
+                                             Height="40"
+                                             Padding="10"
+                                             FontSize="14"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="4"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Номер паспорта" 
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,5"/>
+                                    <TextBox x:Name="PassportNumberTextBox" 
+                                             Background="White"
+                                             BorderBrush="#E0E0E0"
+                                             BorderThickness="1"
+                                             Height="40"
+                                             Padding="10"
+                                             FontSize="14"
+                                             VerticalContentAlignment="Center"
+                                             MaxLength="6"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
+                    </Border>
 
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Номер паспорта" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox x:Name="PassportNumberTextBox" 
-                                     Style="{StaticResource ModernTextBox}"
-                                     MaxLength="6"/>
-                        </StackPanel>
-                    </Grid>
+                    <!-- Информация о регистрации (только для редактирования) -->
+                    <Border x:Name="RegistrationInfoBorder"
+                            Background="#FFF8E1" 
+                            CornerRadius="6" 
+                            Padding="18,15" 
+                            Margin="0,0,0,18"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="📊" 
+                                           FontSize="16" 
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="Информация о регистрации" 
+                                           Foreground="#F57C00"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
 
-                    <!-- Подсказка -->
-                    <Border Background="#E3F2FD" CornerRadius="4" Padding="15" Margin="0,30,0,20">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="💡" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Top"/>
-                            <TextBlock Text="Поля, отмеченные звёздочкой (*), являются обязательными для заполнения. 
-Убедитесь, что все данные введены корректно перед сохранением." 
-                                       TextWrapping="Wrap"
-                                       Foreground="#1976D2"
-                                       FontSize="13"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Дата регистрации" 
+                                               Foreground="#757575"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="RegistrationDateText"
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="ID клиента" 
+                                               Foreground="#757575"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="ClientIdText"
+                                               Foreground="#424242"
+                                               FontSize="14"
+                                               FontWeight="Bold"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
 
@@ -328,14 +366,39 @@
 
                 <Button Grid.Column="1" 
                         Content="Сохранить" 
-                        Style="{StaticResource DialogButton}"
+                        Background="#2196F3"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Height="44"
+                        Width="120"
+                        FontSize="14"
+                        FontWeight="SemiBold"
                         Click="SaveButton_Click"
-                        Margin="0,0,15,0"/>
+                        Margin="0,0,15,0">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
 
                 <Button Grid.Column="2" 
                         Content="Отмена" 
-                        Style="{StaticResource CancelButton}"
-                        Click="CancelButton_Click"/>
+                        Background="#F5F5F5"
+                        Foreground="#424242"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        Height="44"
+                        Width="120"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Click="CancelButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
             </Grid>
         </Border>
     </Grid>

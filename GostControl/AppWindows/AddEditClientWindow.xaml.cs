@@ -6,33 +6,66 @@ namespace GostControl.AppWindows
 {
     public partial class AddEditClientWindow : Window
     {
-        public Client Client { get; private set; }
+        private readonly Client _client;
+        private readonly bool _isNew;
 
-        public AddEditClientWindow()
+        public AddEditClientWindow(Client client, bool isNew)
         {
             InitializeComponent();
-            Client = new Client();
-            TitleText.Text = "Добавление клиента";
+            _client = client;
+            _isNew = isNew;
+
+            Title = _isNew ? "Добавление клиента" : "Редактирование клиента";
+            TitleText.Text = _isNew ? "Добавление клиента" : "Редактирование клиента";
+
+            LoadClientData();
+            SetupRegistrationInfo();
         }
 
-        public AddEditClientWindow(Client clientToEdit) : this()
+        private void LoadClientData()
         {
-            if (clientToEdit == null)
-                throw new ArgumentNullException(nameof(clientToEdit));
+            // Загрузка данных только если это редактирование существующего клиента
+            if (!_isNew && _client != null)
+            {
+                LastNameTextBox.Text = _client.LastName ?? "";
+                FirstNameTextBox.Text = _client.FirstName ?? "";
+                MiddleNameTextBox.Text = _client.MiddleName ?? "";
+                PhoneTextBox.Text = _client.PhoneNumber ?? "";
+                EmailTextBox.Text = _client.Email ?? "";
+                PassportSeriesTextBox.Text = _client.PassportSeries ?? "";
+                PassportNumberTextBox.Text = _client.PassportNumber ?? "";
 
-            TitleText.Text = "Редактирование клиента";
+                if (_client.DateOfBirth.HasValue)
+                {
+                    BirthDatePicker.SelectedDate = _client.DateOfBirth.Value;
+                }
+            }
+        }
 
-            LastNameTextBox.Text = clientToEdit.LastName ?? "";
-            FirstNameTextBox.Text = clientToEdit.FirstName ?? "";
-            MiddleNameTextBox.Text = clientToEdit.MiddleName ?? "";
-            BirthDatePicker.SelectedDate = clientToEdit.DateOfBirth;
-            PhoneTextBox.Text = clientToEdit.PhoneNumber ?? "";
-            EmailTextBox.Text = clientToEdit.Email ?? "";
-            PassportSeriesTextBox.Text = clientToEdit.PassportSeries ?? "";
-            PassportNumberTextBox.Text = clientToEdit.PassportNumber ?? "";
+        private void SetupRegistrationInfo()
+        {
+            // Показываем информацию о регистрации только для редактирования существующего клиента
+            if (!_isNew && _client != null)
+            {
+                RegistrationInfoBorder.Visibility = Visibility.Visible;
 
-            Client.ClientID = clientToEdit.ClientID;
-            Client.RegistrationDate = clientToEdit.RegistrationDate;
+                // Устанавливаем ID клиента
+                ClientIdText.Text = _client.ClientID > 0 ? _client.ClientID.ToString() : "Нет данных";
+
+                // Устанавливаем дату регистрации
+                if (_client.RegistrationDate != default)
+                {
+                    RegistrationDateText.Text = _client.RegistrationDate.ToString("dd.MM.yyyy");
+                }
+                else
+                {
+                    RegistrationDateText.Text = "Нет данных";
+                }
+            }
+            else
+            {
+                RegistrationInfoBorder.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -41,21 +74,26 @@ namespace GostControl.AppWindows
                 string.IsNullOrWhiteSpace(FirstNameTextBox.Text) ||
                 string.IsNullOrWhiteSpace(PhoneTextBox.Text))
             {
-                MessageBox.Show("Заполните обязательные поля: Фамилия, Имя, Телефон.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Заполните обязательные поля: Фамилия, Имя, Телефон.",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            Client.LastName = LastNameTextBox.Text.Trim();
-            Client.FirstName = FirstNameTextBox.Text.Trim();
-            Client.MiddleName = MiddleNameTextBox.Text?.Trim();
-            Client.DateOfBirth = BirthDatePicker.SelectedDate;
-            Client.PhoneNumber = PhoneTextBox.Text.Trim();
-            Client.Email = EmailTextBox.Text?.Trim();
-            Client.PassportSeries = PassportSeriesTextBox.Text?.Trim();
-            Client.PassportNumber = PassportNumberTextBox.Text?.Trim();
+            // Сохранение данных в объект клиента
+            _client.LastName = LastNameTextBox.Text.Trim();
+            _client.FirstName = FirstNameTextBox.Text.Trim();
+            _client.MiddleName = MiddleNameTextBox.Text?.Trim();
+            _client.PhoneNumber = PhoneTextBox.Text.Trim();
+            _client.Email = EmailTextBox.Text?.Trim();
+            _client.PassportSeries = PassportSeriesTextBox.Text?.Trim();
+            _client.PassportNumber = PassportNumberTextBox.Text?.Trim();
+            _client.DateOfBirth = BirthDatePicker.SelectedDate;
 
-            if (Client.RegistrationDate == default)
-                Client.RegistrationDate = DateTime.Now;
+            // Если это новый клиент - установить дату регистрации
+            if (_isNew)
+            {
+                _client.RegistrationDate = DateTime.Now;
+            }
 
             DialogResult = true;
             Close();

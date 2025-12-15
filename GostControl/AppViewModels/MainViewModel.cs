@@ -115,17 +115,25 @@ namespace GostControl.AppViewModels
         {
             try
             {
-                var addWindow = new AddEditClientWindow();
+                // Создаем нового клиента
+                var newClient = new Client();
+
+                // Используем конструктор с параметром bool (true = новый клиент)
+                var addWindow = new AddEditClientWindow(newClient, true)
+                {
+                    Owner = Application.Current.MainWindow
+                };
 
                 if (addWindow.ShowDialog() == true)
                 {
-                    var clientToAdd = addWindow.Client;
-                    _clientRepository.AddClient(clientToAdd);
+                    // Клиент уже обновлен в окне, добавляем в репозиторий
+                    _clientRepository.AddClient(newClient);
 
                     LoadClients(null);
                     ShowSuccessMessage("Клиент успешно добавлен!");
 
-                    SelectedClient = Clients.FirstOrDefault(c => c.ClientID == clientToAdd.ClientID);
+                    // Выбор нового клиента
+                    SelectedClient = Clients.FirstOrDefault(c => c.ClientID == newClient.ClientID);
                 }
             }
             catch (Exception ex)
@@ -152,7 +160,7 @@ namespace GostControl.AppViewModels
                     return;
                 }
 
-                // Создание копии клиента для редактирования
+                // Создаем копию клиента для редактирования
                 var clientCopy = new Client
                 {
                     ClientID = clientToEdit.ClientID,
@@ -167,11 +175,15 @@ namespace GostControl.AppViewModels
                     RegistrationDate = clientToEdit.RegistrationDate
                 };
 
-                var editWindow = new AddEditClientWindow(clientCopy);
+                // Используем конструктор с параметром bool (false = редактирование)
+                var editWindow = new AddEditClientWindow(clientCopy, false)
+                {
+                    Owner = Application.Current.MainWindow
+                };
 
                 if (editWindow.ShowDialog() == true)
                 {
-                    // Обновление оригинального объекта данными из копии
+                    // Обновляем оригинальный объект данными из копии
                     clientToEdit.LastName = clientCopy.LastName;
                     clientToEdit.FirstName = clientCopy.FirstName;
                     clientToEdit.MiddleName = clientCopy.MiddleName;

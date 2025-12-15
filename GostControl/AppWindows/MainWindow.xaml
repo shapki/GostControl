@@ -178,7 +178,7 @@
                            Height="32" 
                            VerticalAlignment="Center" 
                            Margin="0,0,10,0"/>
-    
+
                     <!-- Текст логотипа -->
                     <TextBlock Text="ГОСТКОНТРОЛЬ" 
                                Foreground="White" 
@@ -189,8 +189,13 @@
 
                 <!-- Навигация -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
-                    <Button Content="📊 Статистика" Style="{StaticResource ModernButton}" Margin="0,0,10,0"/>
-                    <Button Content="⚙️ Настройки" Style="{StaticResource ModernButton}"/>
+                    <Button Content="📊 Статистика" 
+                        Style="{StaticResource ModernButton}" 
+                        Margin="0,0,10,0"
+                        Click="StatisticsButton_Click"/>
+                    <Button Content="⚙️ Настройки" 
+                        Style="{StaticResource ModernButton}"
+                        Click="SettingsButton_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -238,12 +243,15 @@
                         <Border Background="#F5F5F5" CornerRadius="4" Padding="10" Margin="20,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBox Text="Поиск клиентов..." 
-                                         Width="200" 
-                                         BorderThickness="0" 
-                                         Background="Transparent"
-                                         Foreground="#666"
-                                         VerticalContentAlignment="Center"/>
+                                <!-- Поле поиска -->
+                                <Grid Width="200">
+                                    <TextBox x:Name="SearchTextBox"
+                                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" 
+                                             Background="Transparent"
+                                             Foreground="#424242"
+                                             VerticalContentAlignment="Center"/>
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -351,8 +359,13 @@
 
             <!-- Быстрые действия -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Content="📋 Экспорт в Excel" Style="{StaticResource ModernButton}" Margin="0,0,10,0"/>
-                <Button Content="📄 Печать" Style="{StaticResource ModernButton}"/>
+                <Button Content="📋 Экспорт в CSV" 
+                    Style="{StaticResource ModernButton}" 
+                    Margin="0,0,10,0"
+                    Click="ExportToExcelButton_Click"/>
+                <Button Content="📄 Печать" 
+                    Style="{StaticResource ModernButton}"
+                    Click="PrintButton_Click"/>
             </StackPanel>
         </Grid>
 
