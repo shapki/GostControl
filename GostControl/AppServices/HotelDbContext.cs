@@ -109,6 +109,12 @@ namespace GostControl.AppData
                     .IsUnique();
                 entity.Property(e => e.IsAvailable)
                     .HasDefaultValue(true);
+
+                entity.HasOne(r => r.Category)
+                    .WithMany(c => c.Rooms)
+                    .HasForeignKey(r => r.CategoryID)
+                    .HasConstraintName("FK_Rooms_RoomCategories")
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Booking>(entity =>
@@ -135,6 +141,11 @@ namespace GostControl.AppData
                     .HasMaxLength(50);
                 entity.Property(e => e.BasePrice)
                     .HasColumnType("decimal(10, 2)");
+
+                entity.HasMany(c => c.Rooms)
+                    .WithOne(r => r.Category)
+                    .HasForeignKey(r => r.CategoryID)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<AdditionalService>(entity =>
@@ -176,12 +187,6 @@ namespace GostControl.AppData
                     .HasMaxLength(20)
                     .HasDefaultValue("Запланировано");
             });
-
-            modelBuilder.Entity<Room>()
-                .HasOne(r => r.Category)
-                .WithMany()
-                .HasForeignKey(r => r.CategoryID)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Client)

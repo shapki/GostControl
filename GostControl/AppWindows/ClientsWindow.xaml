@@ -1,11 +1,11 @@
-﻿<Window x:Class="GostControl.AppWindows.MainWindow"
+﻿<Window x:Class="GostControl.AppWindows.ClientsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GostControl.AppViewModels"
         mc:Ignorable="d"
-        Title="ГостКонтроль - Управление гостиницей" 
+        Title="ГостКонтроль - Управление клиентами" 
         Height="700" Width="1200"
         WindowStartupLocation="CenterScreen"
         Background="#F5F5F5"
@@ -180,7 +180,7 @@
                            Margin="0,0,10,0"/>
 
                     <!-- Текст логотипа -->
-                    <TextBlock Text="ГОСТКОНТРОЛЬ" 
+                    <TextBlock Text="ГОСТКОНТРОЛЬ - КЛИЕНТЫ" 
                                Foreground="White" 
                                FontSize="22" 
                                FontWeight="Bold"
@@ -189,10 +189,14 @@
 
                 <!-- Навигация -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
+                    <Button Content="⬅️ Назад" 
+                        Style="{StaticResource ModernButton}" 
+                        Margin="0,0,10,0"
+                        Click="BackButton_Click"/>
                     <Button Content="📊 Статистика" 
                         Style="{StaticResource ModernButton}" 
                         Margin="0,0,10,0"
-                        Click="StatisticsButton_Click"/>
+                        Click="StatisticsButton_Click" Cursor="Hand"/>
                     <Button Content="⚙️ Настройки" 
                         Style="{StaticResource ModernButton}"
                         Click="SettingsButton_Click"/>

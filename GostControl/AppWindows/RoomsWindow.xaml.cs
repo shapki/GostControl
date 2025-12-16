@@ -7,15 +7,15 @@ using System.Windows.Input;
 
 namespace GostControl.AppWindows
 {
-    public partial class MainWindow : Window
+    public partial class RoomsWindow : Window
     {
         private AppSettings _appSettings;
 
-        public MainWindow()
+        public RoomsWindow()
         {
             InitializeComponent();
             _appSettings = AppSettings.Load();
-            this.DataContext = new MainViewModel();
+            this.DataContext = new RoomsViewModel();
             ApplySettings();
         }
 
@@ -40,15 +40,15 @@ namespace GostControl.AppWindows
             if (!_appSettings.DoubleClickEditEnabled)
                 return;
 
-            if (DataContext is MainViewModel vm && vm.SelectedClient != null)
+            if (DataContext is RoomsViewModel vm && vm.SelectedRoom != null)
             {
-                vm.EditClient(null);
+                vm.EditRoom(null);
             }
         }
 
         private void StatisticsButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Функция статистики в разработке...", "Информация",
+            MessageBox.Show("Статистика номеров находится в разработке...", "Информация",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -67,50 +67,56 @@ namespace GostControl.AppWindows
             }
         }
 
-        private void ExportToExcelButton_Click(object sender, RoutedEventArgs e)
+        private void ExportToCsvButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is MainViewModel vm)
+            if (DataContext is RoomsViewModel vm)
             {
-                if (vm.Clients == null || vm.Clients.Count == 0)
+                if (vm.Rooms == null || vm.Rooms.Count == 0)
                 {
                     MessageBox.Show("Нет данных для экспорта", "Информация",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Спросить пользователя о сохранении
-                var result = MessageBox.Show("Экспортировать список клиентов в CSV файл?\n\n" +
+                var result = MessageBox.Show("Экспортировать список номеров в CSV файл?\n\n" +
                                            "Файл будет сохранен в папке Загрузки.",
                                            "Экспорт в CSV",
                                            MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    ExcelExportService.ExportClients(vm.Clients);
+                    MessageBox.Show("Экспорт номеров в CSV находится в разработке", "Информация",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
 
         private void PrintButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is MainViewModel vm)
+            if (DataContext is RoomsViewModel vm)
             {
-                if (vm.Clients == null || vm.Clients.Count == 0)
+                if (vm.Rooms == null || vm.Rooms.Count == 0)
                 {
                     MessageBox.Show("Нет данных для печати", "Информация",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Спросить пользователя о печати
-                var result = MessageBox.Show("Распечатать список клиентов?", "Печать",
+                var result = MessageBox.Show("Распечатать список номеров?", "Печать",
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    PrintService.PrintClients(vm.Clients);
+                    MessageBox.Show("Печать номеров находится в разработке", "Информация",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = true;
+            this.Close();
         }
     }
 }

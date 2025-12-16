@@ -1,0 +1,454 @@
+﻿<Window x:Class="GostControl.AppWindows.RoomsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GostControl.AppViewModels"
+        mc:Ignorable="d"
+        Title="ГостКонтроль - Управление номерами" 
+        Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5"
+        MinWidth="800"
+        MinHeight="600"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        <local:BoolToAvailabilityColorConverter x:Key="BoolToAvailabilityColorConverter"/>
+        <local:BoolToAvailabilityConverter x:Key="BoolToAvailabilityConverter"/>
+
+        <!-- Стили для кнопок -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1976D2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#BDBDBD"/>
+                                <Setter Property="Foreground" Value="#757575"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопок действий -->
+        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#388E3C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для кнопок удаления -->
+        <Style x:Key="DeleteButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#F44336"/>
+            <Setter Property="Width" Value="120"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#D32F2F"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для DataGrid -->
+        <Style x:Key="ModernDataGrid" TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowHeight" Value="40"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        </Style>
+
+        <!-- Стиль для заголовков столбцов DataGrid -->
+        <Style x:Key="ColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="BorderBrush" Value="#1976D2"/>
+        </Style>
+
+        <!-- Стиль для строк DataGrid -->
+        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F5F5F5"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="True"/>
+                        <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#F5F5F5"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для ячеек DataGrid -->
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Background="{TemplateBinding Background}" 
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для центрированного текста в DataGrid -->
+        <Style x:Key="CenterTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Стиль для статуса доступности -->
+        <Style x:Key="AvailabilityStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Хедер -->
+        <Border Grid.Row="0" Background="#2196F3" Height="60">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Логотип -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                    <Image Source="/Resources/logo.png"
+                           Width="32" 
+                           Height="32" 
+                           VerticalAlignment="Center" 
+                           Margin="0,0,10,0"/>
+                    <TextBlock Text="ГОСТКОНТРОЛЬ - НОМЕРА" 
+                               Foreground="White" 
+                               FontSize="22" 
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Навигация -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,20,0">
+                    <Button Content="⬅️ Назад" 
+                            Style="{StaticResource ModernButton}" 
+                            Margin="0,0,10,0"
+                            Click="BackButton_Click"/>
+                    <Button Content="📊 Статистика" 
+                            Style="{StaticResource ModernButton}" 
+                            Margin="0,0,10,0"
+                            Click="StatisticsButton_Click"/>
+                    <Button Content="⚙️ Настройки" 
+                            Style="{StaticResource ModernButton}"
+                            Click="SettingsButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Панель управления -->
+            <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,20"
+                    BorderBrush="#E0E0E0" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Управление номерами" 
+                               FontSize="18" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,15"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="🔄 Обновить" 
+                                Command="{Binding RefreshCommand}" 
+                                Style="{StaticResource ModernButton}"
+                                Width="120" Margin="0,0,10,0"/>
+
+                        <Button Content="➕ Добавить номер" 
+                                Command="{Binding AddRoomCommand}" 
+                                Style="{StaticResource ActionButton}"
+                                Background="#2196F3"/>
+
+                        <Button Content="✏️ Редактировать" 
+                                Command="{Binding EditRoomCommand}" 
+                                Style="{StaticResource ModernButton}"
+                                Width="140" Margin="10,0,10,0"
+                                IsEnabled="{Binding IsRoomSelected}"/>
+
+                        <Button Content="🗑️ Удалить" 
+                                Command="{Binding DeleteRoomCommand}" 
+                                Style="{StaticResource DeleteButton}"
+                                IsEnabled="{Binding IsRoomSelected}"/>
+
+                        <!-- Поиск -->
+                        <Border Background="#F5F5F5" CornerRadius="4" Padding="10" Margin="20,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <!-- Поле поиска -->
+                                <Grid Width="200">
+                                    <TextBox x:Name="SearchTextBox"
+                                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             BorderThickness="0" 
+                                             Background="Transparent"
+                                             Foreground="#424242"
+                                             VerticalContentAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Список номеров -->
+            <Border Grid.Row="1" Background="White" CornerRadius="8"
+                    BorderBrush="#E0E0E0" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Заголовок таблицы -->
+                    <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <Grid Margin="20,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Список номеров" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBlock Text="Всего номеров:" 
+                                           VerticalAlignment="Center" 
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding TotalRoomsCount}" 
+                                           FontWeight="Bold" 
+                                           Foreground="#2196F3"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text=" | " 
+                                           VerticalAlignment="Center" 
+                                           Margin="5,0,5,0"/>
+                                <TextBlock Text="Доступно:" 
+                                           VerticalAlignment="Center" 
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding AvailableRoomsCount}" 
+                                           FontWeight="Bold" 
+                                           Foreground="#4CAF50"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- DataGrid -->
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding Rooms}"
+                              SelectedItem="{Binding SelectedRoom}"
+                              Style="{StaticResource ModernDataGrid}"
+                              ColumnHeaderStyle="{StaticResource ColumnHeaderStyle}"
+                              RowStyle="{StaticResource DataGridRowStyle}"
+                              CellStyle="{StaticResource DataGridCellStyle}"
+                              Margin="0"
+                              HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Stretch"
+                              MouseDoubleClick="DataGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" 
+                                                Binding="{Binding RoomID}"
+                                                Width="60"
+                                                CanUserResize="False">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CenterTextStyle}"/>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="Номер" 
+                                                Binding="{Binding RoomNumber}"
+                                                Width="1.2*"
+                                                MinWidth="80">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CenterTextStyle}"/>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="Категория" 
+                                                Binding="{Binding Category.CategoryName}"
+                                                Width="1.2*"
+                                                MinWidth="120"/>
+
+                            <DataGridTextColumn Header="Этаж" 
+                                                Binding="{Binding Floor}"
+                                                Width="1.2*"
+                                                CanUserResize="False">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CenterTextStyle}"/>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridCheckBoxColumn Header="Балкон" 
+                                                    Binding="{Binding HasBalcony}"
+                                                    Width="70"
+                                                    IsReadOnly="True">
+                                <DataGridCheckBoxColumn.ElementStyle>
+                                    <Style TargetType="CheckBox">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </Style>
+                                </DataGridCheckBoxColumn.ElementStyle>
+                            </DataGridCheckBoxColumn>
+
+                            <DataGridTemplateColumn Header="Доступность" Width="120" MinWidth="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding IsAvailable, Converter={StaticResource BoolToAvailabilityColorConverter}}"
+                                                CornerRadius="3" Padding="8,4" Margin="2">
+                                            <TextBlock Text="{Binding IsAvailable, Converter={StaticResource BoolToAvailabilityConverter}}"
+                                                       Foreground="White" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Цена/день" 
+                                                Binding="{Binding Category.BasePrice, StringFormat={}{0:C}}"
+                                                Width="1.2*"
+                                                MinWidth="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="0,0,10,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="Вместимость" 
+                                                Binding="{Binding Category.MaxCapacity}"
+                                                Width="1.2*"
+                                                MinWidth="90">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CenterTextStyle}"/>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- Быстрые действия -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="📋 Экспорт в CSV" 
+                        Style="{StaticResource ModernButton}" 
+                        Margin="0,0,10,0"
+                        Click="ExportToCsvButton_Click"/>
+                <Button Content="📄 Печать" 
+                        Style="{StaticResource ModernButton}"
+                        Click="PrintButton_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Футер -->
+        <Border Grid.Row="2" Background="#424242" Height="40">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="© 2025 ГостКонтроль - Система управления гостиницей" 
+                           Foreground="#BDBDBD" 
+                           VerticalAlignment="Center" 
+                           Margin="20,0"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,20,0">
+                    <TextBlock Text="Версия 1.0.0" 
+                               Foreground="#BDBDBD" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,10,0"/>
+                    <TextBlock Text="•" 
+                               Foreground="#BDBDBD" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,10,0"/>
+                    <TextBlock Text="Управление номерами" 
+                               Foreground="#4CAF50" 
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

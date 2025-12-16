@@ -227,7 +227,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AppWindows\MainWindow.xaml">
+    <Page Include="AppWindows\AddEditRoomWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AppWindows\HomeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AppWindows\ClientsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -253,22 +261,38 @@
     <Compile Include="AppServices\HotelDbContext.cs" />
     <Compile Include="AppServices\MessageService.cs" />
     <Compile Include="AppServices\PrintService.cs" />
+    <Compile Include="AppViewModels\BoolToAvailabilityColorConverter.cs" />
+    <Compile Include="AppViewModels\BoolToAvailabilityConverter.cs" />
     <Compile Include="AppViewModels\Converters.cs" />
     <Compile Include="AppViewModels\MainViewModel.cs" />
     <Compile Include="AppViewModels\RelayCommand.cs" />
+    <Compile Include="AppViewModels\RoomsViewModel.cs" />
     <Compile Include="AppWindows\AddEditClientWindow.xaml.cs">
       <DependentUpon>AddEditClientWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AppWindows\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="AppWindows\AddEditRoomWindow.xaml.cs">
+      <DependentUpon>AddEditRoomWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AppWindows\HomeWindow.xaml.cs">
+      <DependentUpon>HomeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AppWindows\ClientsWindow.xaml.cs">
+      <DependentUpon>ClientsWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="AppWindows\RoomsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AppWindows\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppWindows\RoomsWindow.xaml.cs">
+      <DependentUpon>RoomsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AppWindows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>

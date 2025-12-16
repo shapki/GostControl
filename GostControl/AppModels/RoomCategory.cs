@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GostControl.AppModels
 {
+    [Table("RoomCategories")]
     public class RoomCategory
     {
         public int CategoryID { get; set; }
