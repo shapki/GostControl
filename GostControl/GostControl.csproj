@@ -378,6 +378,7 @@
     <None Include="AppDocs\!4_Kursov_zadan_nachinka.docx" />
     <None Include="AppDocs\database_diagram.pdf" />
     <None Include="AppDocs\ПЗ_Шапкин_ИП-22-7к.docx" />
+    <None Include="AppDocs\Презентация_Шапкин_ИП-22-7к.pptx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
